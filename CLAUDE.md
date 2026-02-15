@@ -131,8 +131,43 @@ python desktop.py
 - **Branch**: `main` — web version (Flask + browser UI)
 - **Branch**: `desktop` — desktop version (PyQt6 native GUI)
 
+## Desktop Version — Architecture Notes
+
+### Key Classes in `desktop.py`
+- **`MainWindow`** — Top-level `QMainWindow`. Owns the file browser, workspace, and batch placeholder. Manages image state (`_current_pil`, `_result_pil`), debounce timer, and worker lifecycle.
+- **`ProcessingWorker(QThread)`** — Runs `remove_background()` off the main thread. Emits `finished` signal with the result PIL Image. Terminated and replaced if tolerance changes mid-process.
+- **`ImageLabel(QLabel)`** — Scales a source pixmap to fit its bounds while keeping aspect ratio. Used for the original preview.
+- **`CheckerImageLabel(ImageLabel)`** — Composites a checkerboard behind the pixmap before scaling. Used for the processed/transparent preview.
+- **`DropZone(QFrame)`** — Visible drop target shown before any image is loaded. Emits `file_dropped(str)` signal. Accepts OS file manager drag-and-drop filtered to image extensions.
+
+### Conversion Path
+PIL Image → `pil_to_qpixmap()` (raw RGBA bytes → `QImage` → `QPixmap`) → `ImageLabel.set_source_pixmap()` → scaled on every resize.
+
+### Visual Identity (shared with web)
+- Accent: `#2563eb` / hover `#1d4ed8`
+- Font: DejaVu Sans Mono
+- Labels: 10px uppercase with letter-spacing (matches web's `.label` class)
+- Minimal chrome — same philosophy, native widgets
+
+### What's Stubbed
+- **Batch processing panel**: `QFrame` with "Coming Soon" label at bottom of right panel. Fixed 60px height. Ready to be replaced with a real queue widget (list view + add/remove/run controls).
+
+## Session History
+
+### Session 1 (2026-02-15) — Web version built
+- Built the complete web app: Flask backend, two-phase flood fill algorithm, single-page HTML/CSS/JS frontend
+- Initial commit on `main` branch, pushed to GitHub (papertarrasque-create/PNGZapWeb)
+
+### Session 2 (2026-02-15) — Desktop version
+- Created `desktop` branch from `main`
+- Extracted processing algorithm from `app.py` into shared `processing.py` — both versions import from it
+- Built PyQt6 desktop app (`desktop.py`): file browser tree, drag-and-drop, side-by-side preview with checkerboard, tolerance slider with debounce, save dialog, threaded processing, batch placeholder
+- Chose PyQt6 over tkinter (not installed on system) and PySide6 (same API, less common)
+- Verified: imports clean, processing pipeline works end-to-end on test image, app launches without errors
+- **Next up**: Batch processing implementation, potential UI polish after real-world use
+
 ## What This Is NOT
 - Not a general-purpose image editor
 - Not a photo background remover (no AI/ML subject detection)
-- Not a batch processor (single image at a time)
+- Not a batch processor yet (single image at a time, batch placeholder exists)
 - Not a hosted service (runs locally)
