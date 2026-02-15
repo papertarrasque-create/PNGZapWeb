@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNGZap</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>PNGZap</h1>
+            <p class="subtitle">Drop an image. Remove the background.</p>
+        </header>
+
+        <div id="drop-zone" class="drop-zone">
+            <p>Drop image here</p>
+            <p class="hint">or click to browse</p>
+            <input type="file" id="file-input" accept="image/png,image/jpeg,image/gif,image/bmp,image/tiff,image/webp" hidden>
+        </div>
+
+        <div id="workspace" class="workspace hidden">
+            <div class="preview-container">
+                <div class="preview-panel">
+                    <span class="label">Original</span>
+                    <div class="image-frame">
+                        <img id="before" alt="Original">
+                    </div>
+                </div>
+                <div class="preview-panel">
+                    <span class="label">Transparent</span>
+                    <div class="image-frame checkerboard">
+                        <img id="after" alt="Processed">
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="slider-group">
+                    <label for="tolerance">Tolerance</label>
+                    <input type="range" id="tolerance" min="0" max="100" value="30">
+                    <span id="tolerance-value">30</span>
+                </div>
+                <button id="download-btn" class="btn" disabled>Download</button>
+            </div>
+        </div>
+
+        <div id="status" class="status hidden"></div>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
